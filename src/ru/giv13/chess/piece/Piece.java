@@ -1,9 +1,10 @@
 package ru.giv13.chess.piece;
 
+
 import ru.giv13.chess.Board;
-import ru.giv13.chess.Color;
 import ru.giv13.chess.Cell;
 import ru.giv13.chess.CellShift;
+import ru.giv13.chess.Color;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -21,23 +22,33 @@ abstract public class Piece {
 
     public Set<Cell> getAvailableCells(Board board) {
         Set<Cell> cells = new HashSet<>();
-        for (CellShift shift: getMoves()) {
-            if (cell.canShift(shift)) {
-                Cell shiftedCell = cell.shift(shift);
-                if (isCellAvailableForMove(shiftedCell, board)) {
-                    cells.add(shiftedCell);
+        for (Set<CellShift> direction : getDirections()) {
+            for (CellShift shift : direction) {
+                if (cell.canShift(shift)) {
+                    Cell shiftedCell = cell.shift(shift);
+                    if (isCellAvailableForMove(shiftedCell, board)) {
+                        cells.add(shiftedCell);
+                    }
+                    if (isCellLastForMove(shiftedCell, board)) {
+                        break;
+                    }
                 }
             }
         }
         return cells;
     }
 
-    private boolean isCellAvailableForMove(Cell cell, Board board) {
-        Piece piece = board.getPiece(cell);
+    protected boolean isCellAvailableForMove(Cell shiftedCell, Board board) {
+        Piece piece = board.getPiece(shiftedCell);
         return piece == null || piece.color != color;
     }
 
-    protected abstract Set<CellShift> getMoves();
+    protected boolean isCellLastForMove(Cell shiftedCell, Board board) {
+        Piece piece = board.getPiece(shiftedCell);
+        return piece != null;
+    }
+
+    protected abstract Set<Set<CellShift>> getDirections();
 
     public static Piece fromFEN(char fenChar, Cell cell) {
         char fenCharUpper = Character.toUpperCase(fenChar);
