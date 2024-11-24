@@ -3,6 +3,7 @@ package ru.giv13.chess;
 import ru.giv13.chess.piece.Piece;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class BoardRenderer {
@@ -19,17 +20,17 @@ public class BoardRenderer {
     public static final String ERROR_TEXT_COLOR = "\u001B[31m";
     public static final String SUCCESS_TEXT_COLOR = "\u001B[32m";
 
-    public void render(Board board, Set<Cell> lastMoveCells) {
-        render(board, lastMoveCells, new HashSet<>());
+    public void render(Board board) {
+        render(board, new HashSet<>());
     }
 
-    public void render(Board board, Set<Cell> lastMoveCells, Set<Cell> availableCells) {
+    public void render(Board board, Set<Cell> availableCells) {
         for (int rank = 8; rank >= 1; rank--) {
             StringBuilder line = new StringBuilder();
             for (File file : File.values()) {
                 Cell cell = new Cell(file, rank);
                 Piece piece = board.getPiece(cell);
-                line.append(renderCell(cell, piece, lastMoveCells, availableCells));
+                line.append(renderCell(cell, piece, board.lastMoveCells, availableCells));
             }
             line.append(RESET_COLOR)
                     .append(" ")
@@ -49,7 +50,7 @@ public class BoardRenderer {
         System.out.println(line);
     }
 
-    private String renderCell(Cell cell, Piece piece, Set<Cell> lastMoveCells, Set<Cell> availableCells) {
+    private String renderCell(Cell cell, Piece piece, List<Cell> lastMoveCells, Set<Cell> availableCells) {
         StringBuilder line = new StringBuilder();
         boolean isCellWhite = cell.color == Color.WHITE;
         String cellColor;

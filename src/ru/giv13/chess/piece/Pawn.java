@@ -19,8 +19,14 @@ public class Pawn extends Piece {
         if (shiftedCell.file == cell.file) {
             return piece == null;
         } else {
-            return piece != null && piece.color != color;
+            return piece == null ? board.enPassant(cell, shiftedCell) != null : piece.color != color;
         }
+    }
+
+    @Override
+    protected boolean isCellAvailableForKingAttack(Cell shiftedCell, Board board) {
+        Piece piece = board.getPiece(shiftedCell);
+        return piece == null && shiftedCell.file != cell.file;
     }
 
     @Override

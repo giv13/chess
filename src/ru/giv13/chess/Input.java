@@ -59,12 +59,13 @@ public class Input {
                 continue;
             }
 
-            Set<Cell> availableCells = piece.getAvailableCells(board);
+            Set<Cell> availableCells = piece.getAvailableCells(board, Type.MOVE);
             if (availableCells.isEmpty()) {
                 error("The piece doesn't have available moves");
                 continue;
             }
 
+            board.lastMoveCells.add(cell);
             return cell;
         }
     }

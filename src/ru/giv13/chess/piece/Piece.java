@@ -1,10 +1,10 @@
 package ru.giv13.chess.piece;
 
-
 import ru.giv13.chess.Board;
 import ru.giv13.chess.Cell;
 import ru.giv13.chess.CellShift;
 import ru.giv13.chess.Color;
+import ru.giv13.chess.Type;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -20,16 +20,19 @@ abstract public class Piece {
         this.cell = cell;
     }
 
-    public Set<Cell> getAvailableCells(Board board) {
+    public Set<Cell> getAvailableCells(Board board, Type type) {
         Set<Cell> cells = new HashSet<>();
         for (Set<CellShift> direction : getDirections()) {
             for (CellShift shift : direction) {
                 if (cell.canShift(shift)) {
                     Cell shiftedCell = cell.shift(shift);
-                    if (isCellAvailableForMove(shiftedCell, board)) {
+                    if (type == Type.MOVE && isCellAvailableForMove(shiftedCell, board)) {
                         cells.add(shiftedCell);
                     }
-                    if (isCellLastForMove(shiftedCell, board)) {
+                    if (type == Type.ATTACK && isCellAvailableForKingAttack(shiftedCell, board)) {
+                        cells.add(shiftedCell);
+                    }
+                    if (isCellLastForMove(shiftedCell, board, type)) {
                         break;
                     }
                 }
@@ -40,12 +43,17 @@ abstract public class Piece {
 
     protected boolean isCellAvailableForMove(Cell shiftedCell, Board board) {
         Piece piece = board.getPiece(shiftedCell);
-        return piece == null || piece.color != color;
+        return piece == null || (piece.color != color && !(piece instanceof King));
     }
 
-    protected boolean isCellLastForMove(Cell shiftedCell, Board board) {
+    protected boolean isCellAvailableForKingAttack(Cell shiftedCell, Board board) {
         Piece piece = board.getPiece(shiftedCell);
-        return piece != null;
+        return piece == null || (piece.color != color && piece instanceof King);
+    }
+
+    protected boolean isCellLastForMove(Cell shiftedCell, Board board, Type type) {
+        Piece piece = board.getPiece(shiftedCell);
+        return piece != null && (type != Type.ATTACK || !(piece.color != color && piece instanceof King));
     }
 
     protected abstract Set<Set<CellShift>> getDirections();
