@@ -38,4 +38,18 @@ abstract public class Piece {
     }
 
     protected abstract Set<CellShift> getMoves();
+
+    public static Piece fromFEN(char fenChar, Cell cell) {
+        char fenCharUpper = Character.toUpperCase(fenChar);
+        Color color = fenCharUpper == fenChar ? Color.WHITE : Color.BLACK;
+        return switch (fenCharUpper) {
+            case 'B' -> new Bishop(color, cell);
+            case 'K' -> new King(color, cell);
+            case 'N' -> new Knight(color, cell);
+            case 'P' -> new Pawn(color, cell);
+            case 'R' -> new Rook(color, cell);
+            case 'Q' -> new Queen(color, cell);
+            default -> throw new RuntimeException("The char \"" + fenChar + "\" is unknown");
+        };
+    }
 }

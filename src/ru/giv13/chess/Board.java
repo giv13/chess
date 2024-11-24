@@ -24,30 +24,28 @@ public class Board {
         setPiece(to, piece);
     }
 
-    public void setDefaultPosition() {
-        for (File file : File.values()) {
-            setPiece(new Cell(file, 2), new Pawn(Color.WHITE, new Cell(file, 2)));
-            setPiece(new Cell(file, 7), new Pawn(Color.BLACK, new Cell(file, 7)));
+    public static Board setDefaultPosition() {
+        return fromFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    }
+
+    public static Board fromFEN(String fen) {
+        Board board = new Board();
+        String[] parts = fen.split(" ");
+        String[] lines = parts[0].split("/");
+
+        for (int i = 0; i < lines.length; i++) {
+            int file = 0;
+            int rank = 8 - i;
+            for (char fenChar : lines[i].toCharArray())  {
+                if (Character.isDigit(fenChar)) {
+                    file += Character.getNumericValue(fenChar);
+                } else {
+                    Cell cell = new Cell(File.values()[file], rank);
+                    board.setPiece(cell, Piece.fromFEN(fenChar, cell));
+                    file++;
+                }
+            }
         }
-
-        setPiece(new Cell(File.A, 1), new Rook(Color.WHITE, new Cell(File.A, 1)));
-        setPiece(new Cell(File.H, 1), new Rook(Color.WHITE, new Cell(File.H, 1)));
-        setPiece(new Cell(File.A, 8), new Rook(Color.BLACK, new Cell(File.A, 8)));
-        setPiece(new Cell(File.H, 8), new Rook(Color.BLACK, new Cell(File.H, 8)));
-
-        setPiece(new Cell(File.B, 1), new Knight(Color.WHITE, new Cell(File.B, 1)));
-        setPiece(new Cell(File.G, 1), new Knight(Color.WHITE, new Cell(File.G, 1)));
-        setPiece(new Cell(File.B, 8), new Knight(Color.BLACK, new Cell(File.B, 8)));
-        setPiece(new Cell(File.G, 8), new Knight(Color.BLACK, new Cell(File.G, 8)));
-
-        setPiece(new Cell(File.C, 1), new Bishop(Color.WHITE, new Cell(File.C, 1)));
-        setPiece(new Cell(File.F, 1), new Bishop(Color.WHITE, new Cell(File.F, 1)));
-        setPiece(new Cell(File.C, 8), new Bishop(Color.BLACK, new Cell(File.C, 8)));
-        setPiece(new Cell(File.F, 8), new Bishop(Color.BLACK, new Cell(File.F, 8)));
-
-        setPiece(new Cell(File.D, 1), new Queen(Color.WHITE, new Cell(File.D, 1)));
-        setPiece(new Cell(File.E, 1), new King(Color.WHITE, new Cell(File.E, 1)));
-        setPiece(new Cell(File.D, 8), new Queen(Color.BLACK, new Cell(File.D, 8)));
-        setPiece(new Cell(File.E, 8), new King(Color.BLACK, new Cell(File.E, 8)));
+        return board;
     }
 }
