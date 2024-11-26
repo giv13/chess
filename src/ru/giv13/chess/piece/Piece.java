@@ -68,7 +68,7 @@ abstract public class Piece {
             case 'P' -> new Pawn(color, cell);
             case 'R' -> new Rook(color, cell);
             case 'Q' -> new Queen(color, cell);
-            default -> throw new RuntimeException("The char \"" + fenChar + "\" is unknown");
+            default -> null;
         };
     }
 }

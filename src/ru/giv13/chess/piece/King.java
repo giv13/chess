@@ -17,8 +17,9 @@ public class King extends Piece {
 
     @Override
     protected boolean isCellAvailableForMove(Cell shiftedCell, Board board) {
+        boolean isCastling = Math.abs(shiftedCell.file.ordinal() - cell.file.ordinal()) == 2;
         return super.isCellAvailableForMove(shiftedCell, board) && !isCellUnderAttack(shiftedCell, board)
-                && (!board.castlings.containsKey(shiftedCell) || board.castlings.get(shiftedCell));
+                && (!isCastling || board.castlings.contains(shiftedCell));
     }
 
     @Override

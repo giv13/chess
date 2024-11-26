@@ -14,15 +14,11 @@ import java.util.Set;
 
 public class Board {
     final private Map<Cell, Piece> pieces = new HashMap<>();
-    public Map<Cell, Boolean> castlings = new HashMap<>();
+    public boolean isWhiteTurn = true;
+    public Set<Cell> castlings = new HashSet<>();
     public List<Cell> lastMoveCells = new ArrayList<>();
-
-    public Board() {
-        castlings.put(new Cell(File.C, 1), true);
-        castlings.put(new Cell(File.G, 1), true);
-        castlings.put(new Cell(File.C, 8), true);
-        castlings.put(new Cell(File.G, 8), true);
-    }
+    public int halfmoveClock = 0;
+    public int fullmoveNumber = 0;
 
     public Piece getPiece(Cell cell) { return pieces.get(cell); }
 
@@ -37,36 +33,50 @@ public class Board {
 
     public void movePiece(Cell from, Cell to) {
         Piece piece = getPiece(from);
+
+        Piece pieceTo = getPiece(to);
+        if (piece instanceof Pawn || pieceTo != null) {
+            halfmoveClock = 0;
+        } else {
+            halfmoveClock++;
+        }
+        if (piece.color == Color.BLACK) {
+            fullmoveNumber++;
+        }
+
         if (piece instanceof King) {
-            if (castlings.containsKey(to)) {
+            if (castlings.contains(to)) {
                 boolean isLong = from.file.ordinal() > to.file.ordinal();
                 movePiece(new Cell(isLong ? File.A : File.H, from.rank), new Cell(File.values()[from.file.ordinal() + (isLong ? -1 : 1)], from.rank));
             }
             if (piece.color == Color.WHITE) {
-                castlings.replace(new Cell(File.C, 1), false);
-                castlings.replace(new Cell(File.G, 1), false);
+                castlings.remove(new Cell(File.C, 1));
+                castlings.remove(new Cell(File.G, 1));
             } else {
-                castlings.replace(new Cell(File.C, 8), false);
-                castlings.replace(new Cell(File.G, 8), false);
+                castlings.remove(new Cell(File.C, 8));
+                castlings.remove(new Cell(File.G, 8));
             }
         }
         if (piece instanceof Rook) {
             if (from.equals(new Cell(File.A, 1))) {
-                castlings.replace(new Cell(File.C, 1), false);
+                castlings.remove(new Cell(File.C, 1));
             } else if (from.equals(new Cell(File.H, 1))) {
-                castlings.replace(new Cell(File.G, 1), false);
+                castlings.remove(new Cell(File.G, 1));
             } else if (from.equals(new Cell(File.A, 8))) {
-                castlings.replace(new Cell(File.C, 8), false);
+                castlings.remove(new Cell(File.C, 8));
             } else if (from.equals(new Cell(File.H, 8))) {
-                castlings.replace(new Cell(File.G, 8), false);
+                castlings.remove(new Cell(File.G, 8));
             }
         }
+
         Cell enPassant = enPassant(from, to);
         if (enPassant != null) {
             removePiece(enPassant);
         }
+
         removePiece(from);
         setPiece(to, piece);
+
         lastMoveCells.clear();
         lastMoveCells.add(from);
         lastMoveCells.add(to);
@@ -106,8 +116,8 @@ public class Board {
     public static Board fromFEN(String fen) {
         Board board = new Board();
         String[] parts = fen.split(" ");
-        String[] lines = parts[0].split("/");
 
+        String[] lines = parts[0].split("/");
         for (int i = 0; i < lines.length; i++) {
             int file = 0;
             int rank = 8 - i;
@@ -116,11 +126,86 @@ public class Board {
                     file += Character.getNumericValue(fenChar);
                 } else {
                     Cell cell = new Cell(File.values()[file], rank);
-                    board.setPiece(cell, Piece.fromFEN(fenChar, cell));
+                    Piece piece = Piece.fromFEN(fenChar, cell);
+                    if (piece != null) {
+                        board.setPiece(cell, piece);
+                    }
                     file++;
                 }
             }
         }
+
+        if (parts[1].equals("b")) {
+            board.isWhiteTurn = false;
+        }
+
+        if (parts[2].contains("Q")) {
+            Piece king = board.getPiece(new Cell(File.E, 1));
+            Piece rook = board.getPiece(new Cell(File.A, 1));
+            if (king instanceof King && king.color == Color.WHITE && rook instanceof Rook && rook.color == Color.WHITE) {
+                board.castlings.add(new Cell(File.C, 1));
+            }
+        }
+        if (parts[2].contains("K")) {
+            Piece king = board.getPiece(new Cell(File.E, 1));
+            Piece rook = board.getPiece(new Cell(File.H, 1));
+            if (king instanceof King && king.color == Color.WHITE && rook instanceof Rook && rook.color == Color.WHITE) {
+                board.castlings.add(new Cell(File.G, 1));
+            }
+        }
+        if (parts[2].contains("q")) {
+            Piece king = board.getPiece(new Cell(File.E, 8));
+            Piece rook = board.getPiece(new Cell(File.A, 8));
+            if (king instanceof King && king.color == Color.BLACK && rook instanceof Rook && rook.color == Color.BLACK) {
+                board.castlings.add(new Cell(File.C, 8));
+            }
+        }
+        if (parts[2].contains("k")) {
+            Piece king = board.getPiece(new Cell(File.E, 8));
+            Piece rook = board.getPiece(new Cell(File.H, 8));
+            if (king instanceof King && king.color == Color.BLACK && rook instanceof Rook && rook.color == Color.BLACK) {
+                board.castlings.add(new Cell(File.G, 8));
+            }
+        }
+
+        if (parts[3].length() == 2) {
+            char fileChar = parts[3].charAt(0);
+            char rankChar = parts[3].charAt(1);
+            if (Character.isLetter(fileChar) && Character.isDigit(rankChar)) {
+                File file = File.fromChar(fileChar);
+                int rank = Character.getNumericValue(rankChar);
+                if (file != null) {
+                    if (board.isWhiteTurn && rank == 6) {
+                        Piece piece = board.getPiece(new Cell(file, rank - 1));
+                        if (piece instanceof Pawn) {
+                            board.lastMoveCells.add(new Cell(file, rank + 1));
+                            board.lastMoveCells.add(piece.cell);
+                        }
+                    }
+                    if (!board.isWhiteTurn && rank == 3) {
+                        Piece piece = board.getPiece(new Cell(file, rank + 1));
+                        if (piece instanceof Pawn) {
+                            board.lastMoveCells.add(new Cell(file, rank - 1));
+                            board.lastMoveCells.add(piece.cell);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (parts[4].matches("\\d+")) {
+            int halfmoveClock = Integer.parseInt(parts[4]);
+            if (halfmoveClock > 49) {
+                halfmoveClock = 49;
+            }
+            board.halfmoveClock = halfmoveClock;
+        }
+
+        if (parts[5].matches("\\d+")) {
+            int fullmoveNumber = Integer.parseInt(parts[5]);
+            board.fullmoveNumber = fullmoveNumber;
+        }
+
         return board;
     }
 }

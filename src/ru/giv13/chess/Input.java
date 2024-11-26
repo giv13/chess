@@ -40,10 +40,10 @@ public class Input {
         }
     }
 
-    public static Cell inputPieceMoveFrom(boolean isWhiteTurn, Board board) {
+    public static Cell inputPieceMoveFrom(Board board) {
         boolean check = true;
         while (true) {
-            if (check) System.out.println((isWhiteTurn ? BoardRenderer.WHITE_PIECE_COLOR : BoardRenderer.BLACK_PIECE_COLOR) +
+            if (check) System.out.println((board.isWhiteTurn ? BoardRenderer.WHITE_PIECE_COLOR : BoardRenderer.BLACK_PIECE_COLOR) +
                     "Enter the coordinates of the piece you want to move to" + BoardRenderer.RESET_COLOR);
             check = false;
 
@@ -54,7 +54,7 @@ public class Input {
                 continue;
             }
 
-            if (piece.color != (isWhiteTurn ? Color.WHITE : Color.BLACK)) {
+            if (piece.color != (board.isWhiteTurn ? Color.WHITE : Color.BLACK)) {
                 error("The piece is not yours");
                 continue;
             }
@@ -84,6 +84,10 @@ public class Input {
 
             return cell;
         }
+    }
+
+    public static String inputFEN() {
+        return scanner.nextLine();
     }
 
     private static void error (String error) {
