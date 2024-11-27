@@ -25,8 +25,7 @@ public class Pawn extends Piece {
 
     @Override
     protected boolean isCellAvailableForKingAttack(Cell shiftedCell, Board board) {
-        Piece piece = board.getPiece(shiftedCell);
-        return piece == null && shiftedCell.file != cell.file;
+        return super.isCellAvailableForKingAttack(shiftedCell, board) && shiftedCell.file != cell.file;
     }
 
     @Override

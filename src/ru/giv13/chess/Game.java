@@ -21,7 +21,7 @@ public class Game {
 
             Cell from = Input.inputPieceMoveFrom(board);
             Piece piece = board.getPiece(from);
-            Set<Cell> availableCells = piece.getAvailableCells(board, Type.MOVE);
+            Set<Cell> availableCells = piece.getAvailableCells(board);
             renderer.render(board, availableCells);
 
             Cell to = Input.inputPieceMoveTo(board.isWhiteTurn, availableCells);

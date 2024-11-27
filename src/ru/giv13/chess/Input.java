@@ -59,7 +59,7 @@ public class Input {
                 continue;
             }
 
-            Set<Cell> availableCells = piece.getAvailableCells(board, Type.MOVE);
+            Set<Cell> availableCells = piece.getAvailableCells(board);
             if (availableCells.isEmpty()) {
                 error("The piece doesn't have available moves");
                 continue;

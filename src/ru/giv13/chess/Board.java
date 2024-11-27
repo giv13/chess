@@ -27,15 +27,30 @@ public class Board {
         pieces.put(cell, piece);
     }
 
-    public void removePiece(Cell cell) {
-        pieces.remove(cell);
+    public Piece removePiece(Cell cell) {
+        return pieces.remove(cell);
+    }
+
+    public Piece preMovePiece(Cell from, Cell to) {
+        Cell enPassant = enPassant(from, to);
+        Piece removedPiece = enPassant == null ? getPiece(to) : removePiece(enPassant);
+        Piece piece = removePiece(from);
+        setPiece(to, piece);
+        return removedPiece;
+    }
+
+    public void rollbackPreMovePiece(Cell from, Cell to, Piece removedPiece) {
+        Piece piece = removePiece(to);
+        setPiece(from, piece);
+        if (removedPiece != null) {
+            setPiece(removedPiece.cell, removedPiece);
+        }
     }
 
     public void movePiece(Cell from, Cell to) {
         Piece piece = getPiece(from);
 
-        Piece pieceTo = getPiece(to);
-        if (piece instanceof Pawn || pieceTo != null) {
+        if (piece instanceof Pawn || getPiece(to) != null) {
             halfmoveClock = 0;
         } else {
             halfmoveClock++;
@@ -83,7 +98,7 @@ public class Board {
     }
 
     public Cell enPassant(Cell from, Cell to) {
-        if (lastMoveCells.size() == 3) {
+        if (lastMoveCells.size() >= 2) {
             Piece piece = getPiece(from);
             if (piece instanceof Pawn) {
                 Cell lastMoveCell = lastMoveCells.get(1);
