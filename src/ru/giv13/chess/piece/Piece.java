@@ -26,7 +26,7 @@ abstract public class Piece {
             for (CellShift shift : direction) {
                 if (cell.canShift(shift)) {
                     Cell shiftedCell = cell.shift(shift);
-                    if (!isAttack && isCellAvailableForMove(shiftedCell, board) && !isKingUnderAttack(board, shiftedCell)
+                    if (!isAttack && isCellAvailableForMove(shiftedCell, board) && !willKingUnderAttack(shiftedCell, board)
                             || isAttack && isCellAvailableForKingAttack(shiftedCell, board)) {
                         cells.add(shiftedCell);
                     }
@@ -49,53 +49,23 @@ abstract public class Piece {
         return piece == null || (piece.color != color && piece instanceof King);
     }
 
-    private boolean isKingUnderAttack(Board board, Cell shiftedCell) {
-        Piece king = getKing(board);
-        if (king == null) {
-            return false;
-        }
+    protected boolean willKingUnderAttack(Cell shiftedCell, Board board) {
         Cell sourceCell = cell;
         Piece removedPiece = board.preMovePiece(sourceCell, shiftedCell);
-        boolean isCellUnderAttack = isCellUnderAttack(sourceCell, king.cell, board);
+        boolean isCheck = board.isCheck();
         board.rollbackPreMovePiece(sourceCell, shiftedCell, removedPiece);
-        return isCellUnderAttack;
-    }
-
-    private Piece getKing(Board board) {
-        Set<Piece> pieces = board.getPiecesByColor(color);
-        for (Piece piece : pieces) {
-            if (piece instanceof King) {
-                return piece;
-            }
-        }
-        return null;
-    }
-
-    private boolean isCellUnderAttack(Cell sourceCell, Cell kingCell, Board board) {
-        Set<Piece> pieces = board.getPiecesByColor(color.opposite());
-        for (Piece piece : pieces) {
-            Set<Cell> cells = piece.getAvailableCells(board, true);
-            if (cells.contains(kingCell)) {
-                return true;
-            }
-            boolean isCastling = this instanceof King && Math.abs(kingCell.file.ordinal() - sourceCell.file.ordinal()) == 2;
-            if (isCastling) {
-                boolean isRight = kingCell.file.ordinal() > sourceCell.file.ordinal();
-                Cell prevCell = new Cell(File.values()[kingCell.file.ordinal() + (isRight ? -1 : 1)], kingCell.rank);
-                if (cells.contains(sourceCell) || cells.contains(prevCell)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return isCheck;
     }
 
     protected abstract Set<Set<CellShift>> getDirections();
 
     public static Piece fromFEN(char fenChar, Cell cell) {
-        char fenCharUpper = Character.toUpperCase(fenChar);
-        Color color = fenCharUpper == fenChar ? Color.WHITE : Color.BLACK;
-        return switch (fenCharUpper) {
+        Color color = Character.toUpperCase(fenChar) == fenChar ? Color.WHITE : Color.BLACK;
+        return fromSymbol(fenChar, color, cell);
+    }
+
+    public static Piece fromSymbol(char symbol, Color color, Cell cell) {
+        return switch (Character.toUpperCase(symbol)) {
             case 'B' -> new Bishop(color, cell);
             case 'K' -> new King(color, cell);
             case 'N' -> new Knight(color, cell);

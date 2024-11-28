@@ -4,6 +4,7 @@ import ru.giv13.chess.Board;
 import ru.giv13.chess.Cell;
 import ru.giv13.chess.CellShift;
 import ru.giv13.chess.Color;
+import ru.giv13.chess.File;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,8 +16,32 @@ public class King extends Piece {
 
     @Override
     protected boolean isCellAvailableForMove(Cell shiftedCell, Board board) {
-        boolean isCastling = Math.abs(shiftedCell.file.ordinal() - cell.file.ordinal()) == 2;
-        return super.isCellAvailableForMove(shiftedCell, board) && (!isCastling || board.castlings.contains(shiftedCell));
+        boolean isCellAvailableForMove = super.isCellAvailableForMove(shiftedCell, board);
+        if (!isCellAvailableForMove) {
+            return false;
+        }
+        boolean isCastling = Math.abs(cell.file.ordinal() - shiftedCell.file.ordinal()) == 2;
+        if (isCastling) {
+            if (!board.castlings.contains(shiftedCell)) {
+                return false;
+            }
+            boolean isLong = cell.file.ordinal() > shiftedCell.file.ordinal();
+            Cell prevCell = new Cell(File.values()[shiftedCell.file.ordinal() + (isLong ? 1 : -1)], shiftedCell.rank);
+            if (isLong) {
+                Cell nextCell = new Cell(File.values()[shiftedCell.file.ordinal() - 1], shiftedCell.rank);
+                if (board.getPiece(nextCell) != null) {
+                    return false;
+                }
+            }
+            Set<Piece> pieces = board.getPiecesByColor(color.opposite());
+            for (Piece piece : pieces) {
+                Set<Cell> cells = piece.getAvailableCells(board, true);
+                if (cells.contains(cell) || cells.contains(prevCell)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     @Override

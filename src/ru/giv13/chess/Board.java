@@ -14,7 +14,7 @@ import java.util.Set;
 
 public class Board {
     final private Map<Cell, Piece> pieces = new HashMap<>();
-    public boolean isWhiteTurn = true;
+    public Color turn = Color.WHITE;
     public Set<Cell> castlings = new HashSet<>();
     public List<Cell> lastMoveCells = new ArrayList<>();
     public int halfmoveClock = 0;
@@ -62,7 +62,8 @@ public class Board {
         if (piece instanceof King) {
             if (castlings.contains(to)) {
                 boolean isLong = from.file.ordinal() > to.file.ordinal();
-                movePiece(new Cell(isLong ? File.A : File.H, from.rank), new Cell(File.values()[from.file.ordinal() + (isLong ? -1 : 1)], from.rank));
+                Piece rook = removePiece(new Cell(isLong ? File.A : File.H, from.rank));
+                setPiece(new Cell(File.values()[from.file.ordinal() + (isLong ? -1 : 1)], from.rank), rook);
             }
             if (piece.color == Color.WHITE) {
                 castlings.remove(new Cell(File.C, 1));
@@ -89,12 +90,23 @@ public class Board {
             removePiece(enPassant);
         }
 
+        if (piece instanceof Pawn) {
+            if (turn == Color.WHITE && to.rank == 8 || turn == Color.BLACK && to.rank == 1) {
+                char symbol = Input.inputPiecePromoting(turn);
+                Piece promoted = Piece.fromSymbol(symbol, turn, to);
+                if (promoted != null) {
+                    piece = promoted;
+                }
+            }
+        }
+
         removePiece(from);
         setPiece(to, piece);
 
         lastMoveCells.clear();
         lastMoveCells.add(from);
         lastMoveCells.add(to);
+        turn = turn.opposite();
     }
 
     public Cell enPassant(Cell from, Cell to) {
@@ -124,6 +136,41 @@ public class Board {
         return piecesByColor;
     }
 
+    private Piece getKingByColor(Color color) {
+        Set<Piece> pieces = getPiecesByColor(color);
+        for (Piece piece : pieces) {
+            if (piece instanceof King) {
+                return piece;
+            }
+        }
+        return null;
+    }
+
+    public boolean isCheck() {
+        Set<Piece> pieces = getPiecesByColor(turn.opposite());
+        Piece king = getKingByColor(turn);
+        if (king != null) {
+            for (Piece piece : pieces) {
+                Set<Cell> cells = piece.getAvailableCells(this, true);
+                if (cells.contains(king.cell)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isThereAvailableMoves() {
+        Set<Piece> pieces = getPiecesByColor(turn);
+        for (Piece piece : pieces) {
+            Set<Cell> cells = piece.getAvailableCells(this);
+            if (!cells.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static Board setDefaultPosition() {
         return fromFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     }
@@ -151,7 +198,7 @@ public class Board {
         }
 
         if (parts[1].equals("b")) {
-            board.isWhiteTurn = false;
+            board.turn = Color.BLACK;
         }
 
         if (parts[2].contains("Q")) {
@@ -190,14 +237,14 @@ public class Board {
                 File file = File.fromChar(fileChar);
                 int rank = Character.getNumericValue(rankChar);
                 if (file != null) {
-                    if (board.isWhiteTurn && rank == 6) {
+                    if (board.turn == Color.WHITE && rank == 6) {
                         Piece piece = board.getPiece(new Cell(file, rank - 1));
                         if (piece instanceof Pawn) {
                             board.lastMoveCells.add(new Cell(file, rank + 1));
                             board.lastMoveCells.add(piece.cell);
                         }
                     }
-                    if (!board.isWhiteTurn && rank == 3) {
+                    if (board.turn == Color.BLACK && rank == 3) {
                         Piece piece = board.getPiece(new Cell(file, rank + 1));
                         if (piece instanceof Pawn) {
                             board.lastMoveCells.add(new Cell(file, rank - 1));

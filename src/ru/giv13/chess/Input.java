@@ -43,8 +43,8 @@ public class Input {
     public static Cell inputPieceMoveFrom(Board board) {
         boolean check = true;
         while (true) {
-            if (check) System.out.println((board.isWhiteTurn ? BoardRenderer.WHITE_PIECE_COLOR : BoardRenderer.BLACK_PIECE_COLOR) +
-                    "Enter the coordinates of the piece you want to move to" + BoardRenderer.RESET_COLOR);
+            if (check) System.out.println("[" + (board.turn == Color.WHITE ? "WHITE" : "BLACK") +
+                    "] Enter the coordinates of the piece you want to move to");
             check = false;
 
             Cell cell = inputCell();
@@ -54,7 +54,7 @@ public class Input {
                 continue;
             }
 
-            if (piece.color != (board.isWhiteTurn ? Color.WHITE : Color.BLACK)) {
+            if (piece.color != board.turn) {
                 error("The piece is not yours");
                 continue;
             }
@@ -70,11 +70,11 @@ public class Input {
         }
     }
 
-    public static Cell inputPieceMoveTo(boolean isWhiteTurn, Set<Cell> cells) {
+    public static Cell inputPieceMoveTo(Color turn, Set<Cell> cells) {
         boolean check = true;
         while (true) {
-            if (check) System.out.println((isWhiteTurn ? BoardRenderer.WHITE_PIECE_COLOR : BoardRenderer.BLACK_PIECE_COLOR) +
-                    "Enter the coordinates of the move" + BoardRenderer.RESET_COLOR);
+            if (check) System.out.println("[" + (turn == Color.WHITE ? "WHITE" : "BLACK") +
+                    "] Enter the coordinates of the move");
             check = false;
             Cell cell = inputCell();
             if (!cells.contains(cell)) {
@@ -86,8 +86,21 @@ public class Input {
         }
     }
 
-    public static String inputFEN() {
-        return scanner.nextLine();
+    public static char inputPiecePromoting(Color turn) {
+        boolean check = true;
+        while (true) {
+            if (check) System.out.println("[" + (turn == Color.WHITE ? "WHITE" : "BLACK") +
+                    "] What piece does a pawn promote to: Q, R, N or B?");
+            check = false;
+
+            String line = scanner.nextLine();
+            if (!line.matches("(?i)[QRNB]")) {
+                error("Invalid symbol");
+                continue;
+            }
+
+            return line.charAt(0);
+        }
     }
 
     private static void error (String error) {
