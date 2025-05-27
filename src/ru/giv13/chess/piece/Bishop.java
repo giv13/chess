@@ -9,7 +9,7 @@ import java.util.Set;
 
 public class Bishop extends Piece {
     public Bishop(Color color, Cell cell) {
-        super("♝", color, cell);
+        super("B", color, cell);
     }
 
     @Override

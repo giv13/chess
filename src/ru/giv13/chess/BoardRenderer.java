@@ -46,7 +46,7 @@ public class BoardRenderer {
         for (File file : File.values()) {
             line.append(" ")
                     .append(file)
-                    .append("\u2003");
+                    .append(" ");
         }
         line.append(RESET_COLOR);
         System.out.println(line);
@@ -68,7 +68,7 @@ public class BoardRenderer {
         }
         line.append(cellColor);
         if (piece == null) {
-            line.append(" \u2003 ");
+            line.append("   ");
         } else {
             line.append(piece.color == Color.WHITE ? WHITE_PIECE_COLOR : BLACK_PIECE_COLOR)
                     .append(" ")

@@ -9,7 +9,7 @@ import java.util.Set;
 
 public class Knight extends Piece {
     public Knight(Color color, Cell cell) {
-        super ("♞", color, cell);
+        super ("N", color, cell);
     }
 
     @Override

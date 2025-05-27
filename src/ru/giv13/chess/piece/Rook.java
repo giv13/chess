@@ -9,7 +9,7 @@ import java.util.Set;
 
 public class Rook extends Piece {
     public Rook(Color color, Cell cell) {
-        super("♜", color, cell);
+        super("R", color, cell);
     }
 
     @Override

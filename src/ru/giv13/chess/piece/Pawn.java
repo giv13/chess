@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class Pawn extends Piece {
     public Pawn(Color color, Cell cell) {
-        super("♟", color, cell);
+        super("P", color, cell);
     }
 
     @Override

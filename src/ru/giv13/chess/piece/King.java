@@ -11,7 +11,7 @@ import java.util.Set;
 
 public class King extends Piece {
     public King(Color color, Cell cell) {
-        super("♚", color, cell);
+        super("K", color, cell);
     }
 
     @Override
