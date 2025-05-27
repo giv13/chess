@@ -103,6 +103,31 @@ public class Input {
         }
     }
 
+    public static int inputMode() {
+        boolean check = true;
+        while (true) {
+            if (check) success("Welcome! Type: 1 - New Game; Or: 2 - Game from FEN.");
+            check = false;
+
+            String line = scanner.nextLine();
+            if (!line.matches("[12]")) {
+                error("Invalid symbol");
+                continue;
+            }
+
+            return Character.getNumericValue(line.charAt(0));
+        }
+    }
+
+    public static String inputFEN() {
+        success("Type FEN-string");
+        return scanner.nextLine();
+    }
+
+    private static void success (String success) {
+        System.out.println(BoardRenderer.SUCCESS_TEXT_COLOR + success + BoardRenderer.RESET_COLOR);
+    }
+
     private static void error (String error) {
         System.out.println(BoardRenderer.ERROR_TEXT_COLOR + error + BoardRenderer.RESET_COLOR);
     }
