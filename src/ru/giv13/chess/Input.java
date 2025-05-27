@@ -106,7 +106,7 @@ public class Input {
     public static int inputMode() {
         boolean check = true;
         while (true) {
-            if (check) success("Welcome! Type: 1 - New Game; Or: 2 - Game from FEN.");
+            if (check) success("Type: 1 - New Game; Or: 2 - Game from FEN.");
             check = false;
 
             String line = scanner.nextLine();

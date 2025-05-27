@@ -14,10 +14,29 @@ public class Game {
 
     public void gameLoop() {
         renderer.render(board);
-        success("The game is started");
-        boolean isThereAvailableMoves = board.isThereAvailableMoves();
+        success("The game is started!");
 
-        while (isThereAvailableMoves) {
+        while (true) {
+            if (board.halfmoveClock >= 100) {
+                success("Draw (fifty-move rule)!");
+                break;
+            }
+
+            if (board.isDeadPosition()) {
+                success("Draw (dead position)!");
+                break;
+            }
+
+            if (!board.isThereAvailableMoves()) {
+                if (board.isCheck()) {
+                    String color = board.turn.opposite().toString();
+                    success("Checkmate! " + color.charAt(0) + color.substring(1).toLowerCase() + " win!");
+                } else {
+                    success("Draw (stalemate)!");
+                }
+                break;
+            }
+
             Cell from = Input.inputPieceMoveFrom(board);
             Piece piece = board.getPiece(from);
             Set<Cell> availableCells = piece.getAvailableCells(board);
@@ -26,15 +45,6 @@ public class Game {
             Cell to = Input.inputPieceMoveTo(board.turn, availableCells);
             board.movePiece(from, to);
             renderer.render(board);
-
-            isThereAvailableMoves = board.isThereAvailableMoves();
-        }
-
-        if (board.isCheck()) {
-            String color = board.turn.opposite().toString();
-            success("Checkmate! " + color.charAt(0) + color.substring(1).toLowerCase() + " Win!");
-        } else {
-            success("Stalemate! Draw!");
         }
     }
 

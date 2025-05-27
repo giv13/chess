@@ -1,9 +1,6 @@
 package ru.giv13.chess;
 
-import ru.giv13.chess.piece.King;
-import ru.giv13.chess.piece.Pawn;
-import ru.giv13.chess.piece.Piece;
-import ru.giv13.chess.piece.Rook;
+import ru.giv13.chess.piece.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -160,6 +157,52 @@ public class Board {
         return false;
     }
 
+    public boolean isDeadPosition() {
+        boolean isDeadPosition = true;
+
+        int whiteKnights = 0;
+        Set<Color> whiteBishops = new HashSet<>();
+        int blackKnights = 0;
+        Set<Color> blackBishops = new HashSet<>();
+
+        for (Piece piece : pieces.values()) {
+            if (piece instanceof Pawn || piece instanceof Rook || piece instanceof Queen) {
+                isDeadPosition = false;
+                break;
+            } else if (piece instanceof Knight) {
+                if (piece.color == Color.WHITE) {
+                    if (whiteKnights > 0 || !whiteBishops.isEmpty()) {
+                        isDeadPosition = false;
+                        break;
+                    }
+                    whiteKnights++;
+                } else {
+                    if (blackKnights > 0 || !blackBishops.isEmpty()) {
+                        isDeadPosition = false;
+                        break;
+                    }
+                    blackKnights++;
+                }
+            } else if (piece instanceof Bishop) {
+                if (piece.color == Color.WHITE) {
+                    if (whiteKnights > 0 || (!whiteBishops.isEmpty() && !whiteBishops.contains(piece.cell.color))) {
+                        isDeadPosition = false;
+                        break;
+                    }
+                    whiteBishops.add(piece.cell.color);
+                } else {
+                    if (blackKnights > 0 || (!blackBishops.isEmpty() && !blackBishops.contains(piece.cell.color))) {
+                        isDeadPosition = false;
+                        break;
+                    }
+                    blackBishops.add(piece.cell.color);
+                }
+            }
+        }
+
+        return isDeadPosition;
+    }
+
     public boolean isThereAvailableMoves() {
         Set<Piece> pieces = getPiecesByColor(turn);
         for (Piece piece : pieces) {
@@ -256,11 +299,7 @@ public class Board {
         }
 
         if (parts[4].matches("\\d+")) {
-            int halfmoveClock = Integer.parseInt(parts[4]);
-            if (halfmoveClock > 49) {
-                halfmoveClock = 49;
-            }
-            board.halfmoveClock = halfmoveClock;
+            board.halfmoveClock = Integer.parseInt(parts[4]);
         }
 
         if (parts[5].matches("\\d+")) {
