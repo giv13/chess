@@ -8,9 +8,14 @@ import java.util.Set;
 public class Input {
     private static final Scanner scanner = new Scanner(System.in);
 
-    private static Cell inputCell() {
+    private static Cell inputCell(Board board) {
         while (true) {
             String line = scanner.nextLine();
+
+            if (line.equals("fen")) {
+                success(Board.toFEN(board));
+                continue;
+            }
 
             if (line.length() != 2) {
                 error("Invalid coordinates format");
@@ -47,7 +52,7 @@ public class Input {
                     "] Enter the coordinates of the piece you want to move to");
             check = false;
 
-            Cell cell = inputCell();
+            Cell cell = inputCell(board);
             Piece piece = board.getPiece(cell);
             if (piece == null) {
                 error("The cell is empty");
@@ -70,13 +75,13 @@ public class Input {
         }
     }
 
-    public static Cell inputPieceMoveTo(Color turn, Set<Cell> cells) {
+    public static Cell inputPieceMoveTo(Board board, Set<Cell> cells) {
         boolean check = true;
         while (true) {
-            if (check) System.out.println("[" + (turn == Color.WHITE ? "WHITE" : "BLACK") +
+            if (check) System.out.println("[" + (board.turn == Color.WHITE ? "WHITE" : "BLACK") +
                     "] Enter the coordinates of the move");
             check = false;
-            Cell cell = inputCell();
+            Cell cell = inputCell(board);
             if (!cells.contains(cell)) {
                 error("The cell isn't available for move");
                 continue;

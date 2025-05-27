@@ -9,30 +9,31 @@
 - Взятие на проходе
 - Правило 50 ходов
 - Проверка "мертвой позиции"
-- Возможность запуска игры из формата FEN
+- Запуск игры из формата FEN
+- Получение позиции доски в виде FEN
 
 ## Установка (Docker)
 
 1. Склонировать репозиторий
 
-    ```bash
-    git clone https://github.com/giv13/chess.git
-    ```
+   ```bash
+   git clone https://github.com/giv13/chess.git
+   ```
    
 2. Перейти в папку с репозиторием
 
-    ```bash
+   ```bash
    cd chess
-    ```
+   ```
 
 3. Создать docker-образ
 
-    ```bash
+   ```bash
    docker build . -t chess
-    ```
+   ```
 
 4. Запустить игру
 
-    ```bash
+   ```bash
    docker run -it --rm chess
-    ```
+   ```

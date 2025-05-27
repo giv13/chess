@@ -14,7 +14,7 @@ public class Game {
 
     public void gameLoop() {
         renderer.render(board);
-        success("The game is started!");
+        success("The game is started! Type \"fen\" during the game to get board position.");
 
         while (true) {
             if (board.halfmoveClock >= 100) {
@@ -42,7 +42,7 @@ public class Game {
             Set<Cell> availableCells = piece.getAvailableCells(board);
             renderer.render(board, availableCells);
 
-            Cell to = Input.inputPieceMoveTo(board.turn, availableCells);
+            Cell to = Input.inputPieceMoveTo(board, availableCells);
             board.movePiece(from, to);
             renderer.render(board);
         }

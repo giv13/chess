@@ -244,13 +244,6 @@ public class Board {
             board.turn = Color.BLACK;
         }
 
-        if (parts[2].contains("Q")) {
-            Piece king = board.getPiece(new Cell(File.E, 1));
-            Piece rook = board.getPiece(new Cell(File.A, 1));
-            if (king instanceof King && king.color == Color.WHITE && rook instanceof Rook && rook.color == Color.WHITE) {
-                board.castlings.add(new Cell(File.C, 1));
-            }
-        }
         if (parts[2].contains("K")) {
             Piece king = board.getPiece(new Cell(File.E, 1));
             Piece rook = board.getPiece(new Cell(File.H, 1));
@@ -258,11 +251,11 @@ public class Board {
                 board.castlings.add(new Cell(File.G, 1));
             }
         }
-        if (parts[2].contains("q")) {
-            Piece king = board.getPiece(new Cell(File.E, 8));
-            Piece rook = board.getPiece(new Cell(File.A, 8));
-            if (king instanceof King && king.color == Color.BLACK && rook instanceof Rook && rook.color == Color.BLACK) {
-                board.castlings.add(new Cell(File.C, 8));
+        if (parts[2].contains("Q")) {
+            Piece king = board.getPiece(new Cell(File.E, 1));
+            Piece rook = board.getPiece(new Cell(File.A, 1));
+            if (king instanceof King && king.color == Color.WHITE && rook instanceof Rook && rook.color == Color.WHITE) {
+                board.castlings.add(new Cell(File.C, 1));
             }
         }
         if (parts[2].contains("k")) {
@@ -270,6 +263,13 @@ public class Board {
             Piece rook = board.getPiece(new Cell(File.H, 8));
             if (king instanceof King && king.color == Color.BLACK && rook instanceof Rook && rook.color == Color.BLACK) {
                 board.castlings.add(new Cell(File.G, 8));
+            }
+        }
+        if (parts[2].contains("q")) {
+            Piece king = board.getPiece(new Cell(File.E, 8));
+            Piece rook = board.getPiece(new Cell(File.A, 8));
+            if (king instanceof King && king.color == Color.BLACK && rook instanceof Rook && rook.color == Color.BLACK) {
+                board.castlings.add(new Cell(File.C, 8));
             }
         }
 
@@ -303,10 +303,70 @@ public class Board {
         }
 
         if (parts[5].matches("\\d+")) {
-            int fullmoveNumber = Integer.parseInt(parts[5]);
-            board.fullmoveNumber = fullmoveNumber;
+            board.fullmoveNumber = Integer.parseInt(parts[5]);
         }
 
         return board;
+    }
+
+    public static String toFEN(Board board) {
+        StringBuilder fen = new StringBuilder();
+        for (int rank = 8; rank >= 1; rank--) {
+            int emptyCellsCount = 0;
+            for (File file : File.values()) {
+                Cell cell = new Cell(file, rank);
+                Piece piece = board.getPiece(cell);
+                if (piece == null) {
+                    emptyCellsCount++;
+                } else {
+                    if (emptyCellsCount > 0) fen.append(emptyCellsCount);
+                    fen.append(piece.color == Color.BLACK ? piece.code.toLowerCase() : piece.code);
+                    emptyCellsCount = 0;
+                }
+            }
+            if (emptyCellsCount > 0) fen.append(emptyCellsCount);
+            if (rank > 1) fen.append("/");
+        }
+        fen.append(" ").append(board.turn == Color.WHITE ? "w" : "b").append(" ");
+
+        if (board.castlings.isEmpty()) {
+            fen.append("-");
+        } else {
+            if (board.castlings.contains(new Cell(File.G, 1))) {
+                fen.append("K");
+            }
+            if (board.castlings.contains(new Cell(File.C, 1))) {
+                fen.append("Q");
+            }
+            if (board.castlings.contains(new Cell(File.G, 8))) {
+                fen.append("k");
+            }
+            if (board.castlings.contains(new Cell(File.C, 8))) {
+                fen.append("q");
+            }
+        }
+
+        String enPassant = "-";
+        if (board.lastMoveCells.size() >= 2) {
+            Piece piece = board.getPiece(board.lastMoveCells.get(1));
+            int fromRank = board.lastMoveCells.getFirst().rank;
+            if (piece instanceof Pawn && (
+                    piece.color == Color.WHITE && piece.cell.rank == 4 && fromRank == 2 ||
+                    piece.color == Color.BLACK && piece.cell.rank == 5 && fromRank == 7)
+            ) {
+                Piece enemyPiece = board.getPiece(new Cell(File.values()[piece.cell.file.ordinal() - 1] , piece.cell.rank));
+                if (enemyPiece instanceof Pawn && enemyPiece.color == piece.color.opposite()) {
+                    enPassant = piece.cell.file.name().toLowerCase() + ((piece.cell.rank + fromRank) / 2);
+                } else {
+                    enemyPiece = board.getPiece(new Cell(File.values()[piece.cell.file.ordinal() + 1] , piece.cell.rank));
+                    if (enemyPiece instanceof Pawn && enemyPiece.color == piece.color.opposite()) {
+                        enPassant = piece.cell.file.name().toLowerCase() + ((piece.cell.rank + fromRank) / 2);
+                    }
+                }
+            }
+        }
+        fen.append(" ").append(enPassant).append(" ").append(board.halfmoveClock).append(" ").append(board.fullmoveNumber);
+
+        return fen.toString();
     }
 }
